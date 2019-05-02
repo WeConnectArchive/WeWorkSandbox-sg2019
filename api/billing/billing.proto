@@ -1,0 +1,15 @@
+syntax = "proto3";
+package billing;
+
+message Empty {}
+
+message Invoice {
+  int64 id = 1;
+  string name = 2;
+  double ammount = 3;
+  bool paid = 4;
+}
+
+service Billing {
+  rpc MarkInvoicePaid(Invoice) returns (Invoice);
+}

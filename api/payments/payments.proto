@@ -1,0 +1,17 @@
+syntax = "proto3";
+package payments;
+
+message PaymentRequest {
+  int64 creditCard = 1;
+  string name = 2;
+  string address = 3;
+  float ammount = 4;
+}
+
+message PaymentResponse {
+  bool paid = 1;
+}
+
+service Payments {
+  rpc MakePayment(PaymentRequest) returns (PaymentResponse);
+}
