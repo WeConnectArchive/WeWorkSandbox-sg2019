@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/wework/sg2019-demo/pkg/mock"
+	"github.com/weworksandbox/sg2019/pkg/mock"
 	grpc "google.golang.org/grpc"
 )
 

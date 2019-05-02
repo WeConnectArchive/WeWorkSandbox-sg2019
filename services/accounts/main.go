@@ -5,9 +5,9 @@ import (
 	"log"
 	"net"
 
-	api "github.com/wework/sg2019-demo/api/accounts"
-	"github.com/wework/sg2019-demo/api/billing"
-	"github.com/wework/sg2019-demo/api/payments"
+	api "github.com/weworksandbox/sg2019/api/accounts"
+	"github.com/weworksandbox/sg2019/api/billing"
+	"github.com/weworksandbox/sg2019/api/payments"
 	"google.golang.org/grpc"
 )
 

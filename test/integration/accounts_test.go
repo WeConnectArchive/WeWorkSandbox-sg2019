@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	api "github.com/wework/sg2019-demo/api/accounts"
-	"github.com/wework/sg2019-demo/api/billing"
-	"github.com/wework/sg2019-demo/api/payments"
-	"github.com/wework/sg2019-demo/pkg/mock"
+	api "github.com/weworksandbox/sg2019/api/accounts"
+	"github.com/weworksandbox/sg2019/api/billing"
+	"github.com/weworksandbox/sg2019/api/payments"
+	"github.com/weworksandbox/sg2019/pkg/mock"
 	"google.golang.org/grpc"
 )
 

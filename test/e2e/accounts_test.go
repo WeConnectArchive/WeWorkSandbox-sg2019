@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	api "github.com/wework/sg2019-demo/api/accounts"
+	api "github.com/weworksandbox/sg2019/api/accounts"
 	"google.golang.org/grpc"
 )
 

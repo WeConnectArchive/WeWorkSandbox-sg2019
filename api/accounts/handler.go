@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/wework/sg2019-demo/api/billing"
-	"github.com/wework/sg2019-demo/api/payments"
+	"github.com/weworksandbox/sg2019/api/billing"
+	"github.com/weworksandbox/sg2019/api/payments"
 )
 
 // Server represents the gRPC server
