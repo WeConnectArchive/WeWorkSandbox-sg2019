@@ -1,6 +1,6 @@
 package mock
 
-// GetInterface is a helper to pull interfaces of interface channels
+// GetInterface is a helper to pull interfaces off interface channels
 func GetInterface(channel chan interface{}) interface{} {
 	select {
 	case chanObj := <-channel:
