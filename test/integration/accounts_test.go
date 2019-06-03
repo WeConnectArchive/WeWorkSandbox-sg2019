@@ -37,10 +37,10 @@ func TestMain(m *testing.M) {
 	accountsClient = api.NewAccountsClient(conn)
 
 	// Run downstream mocks
-	billingChannel = make(chan interface{})
+	billingChannel = make(chan interface{}, 100)
 	go billing.NewMockServer(billingPort, billingChannel)
 
-	paymentsChannel = make(chan interface{})
+	paymentsChannel = make(chan interface{}, 100)
 	go payments.NewMockServer(paymentsPort, paymentsChannel)
 
 	// Run tests
