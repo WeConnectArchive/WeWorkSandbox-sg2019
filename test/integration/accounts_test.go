@@ -17,8 +17,8 @@ import (
 
 const (
 	accountsAddress = "0.0.0.0:50051"
-	paymentsPort    = 50052
-	billingPort     = 50053
+	paymentsPort    = 50053
+	billingPort     = 50052
 )
 
 var (
@@ -43,13 +43,17 @@ func TestMain(m *testing.M) {
 	paymentsChannel = make(chan interface{}, 100)
 	go payments.NewMockServer(paymentsPort, paymentsChannel)
 
+	//wait some time until mock services are started
+	//FIXME sometimes the servers are still unreachable, but I have no time to dive more deeply
+	time.Sleep(2 * time.Second)
+
 	// Run tests
 	os.Exit(m.Run())
 }
 
 func TestPayment(t *testing.T) {
 
-	// Configure Mocks (Set expeted outputs from downstream services)
+	// Configure Mocks (Set expected outputs from downstream services)
 	billingChannel <- &billing.Invoice{Id: 1, Paid: true}
 	paymentsChannel <- &payments.PaymentResponse{Paid: true}
 
@@ -57,68 +61,68 @@ func TestPayment(t *testing.T) {
 	defer cancel()
 	r, err := accountsClient.PayInvoice(ctx, &api.Invoice{Id: 1})
 	if err != nil {
-		log.Fatalf("Payment error: %v", err)
+		t.Fatalf("Payment error: %v", err)
 	}
 	if !r.Paid {
-		log.Fatal("Failed to pay")
+		t.Fatal("Failed to pay")
 	}
 	log.Printf("Paid: %t", r.Paid)
 
 	// Validate Accounts Server made a request to the Payments Service
 	request := mock.GetInterface(paymentsChannel)
 	if request == nil {
-		log.Fatal("Accounts service did not make a request to Payments Service")
+		t.Fatal("Accounts service did not make a request to Payments Service")
 	}
 	pr, ok := request.(*payments.PaymentRequest)
 	if !ok {
-		log.Fatalf("Payments Service recieved the wrong type of request: %v", pr)
+		t.Fatalf("Payments Service recieved the wrong type of request: %v", pr)
 	}
 
 	// Validate Accounts Server made a request to the Billing Service
 	request = mock.GetInterface(billingChannel)
 	if request == nil {
-		log.Fatal("Accounts Service did not make a request to Billing Service")
+		t.Fatal("Accounts Service did not make a request to Billing Service")
 	}
 	br, ok := request.(*billing.Invoice)
 	if !ok {
-		log.Fatalf("Billing Service recieved the wrong type of request: %v", br)
+		t.Fatalf("Billing Service recieved the wrong type of request: %v", br)
 	}
 	// Validate that Accounts Server tried to pay the correct invoice
 	if br.Id != 1 {
-		log.Fatal("Accounts Service tried to mark the wrong invoice as paid")
+		t.Fatal("Accounts Service tried to mark the wrong invoice as paid")
 	}
 }
 
 func TestPaymentFailure(t *testing.T) {
 
-	// Configure Mocks (Set expeted output for downstream services)
-	paymentsChannel <- fmt.Errorf("This is a negative test")
+	// Configure Mocks (Set expected output for downstream services)
+	paymentsChannel <- fmt.Errorf("this is a negative test")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	r, err := accountsClient.PayInvoice(ctx, &api.Invoice{Id: 1})
-	if err != nil {
-		log.Fatalf("Payment error: %v", err)
+	if err == nil {
+		t.Fatalf("Payment error: %v", err)
 	}
 	// We now expect the payment to have failed
-	if r.Paid {
-		log.Fatal("Successfully paid but expected failure")
+	if r != nil {
+		t.Fatal("Successfully paid but expected failure")
 	}
-	log.Printf("Failed to pay as expected")
+	log.Print("Failed to pay as expected")
 
 	// Validate Accounts Server made a request to the Payments Service
 	request := mock.GetInterface(paymentsChannel)
 	if request == nil {
-		log.Fatal("Accounts service did not make a request to Payments Service")
+		t.Fatal("Accounts service did not make a request to Payments Service")
 	}
 	pr, ok := request.(*payments.PaymentRequest)
 	if !ok {
-		log.Fatalf("Payments Service recieved the wrong type of request: %v", pr)
+		t.Fatalf("Payments Service recieved the wrong type of request: %v", pr)
 	}
 
 	// Validate Accounts Server did not make a request to the Billing Service
 	request = mock.GetInterface(billingChannel)
 	if request != nil {
-		log.Fatalf("Accounts Service made a request to Billing Service: %+v", request)
+		t.Fatalf("Accounts Service made a request to Billing Service: %+v", request)
 	}
 }

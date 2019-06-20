@@ -13,7 +13,7 @@ import (
 // NewMockServer creates a new payments gRPC server
 func NewMockServer(port int, messageChan chan interface{}) {
 	// create a listener on passed TCP port
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -40,14 +40,17 @@ type MockServer struct {
 
 // MakePayment returns invoice and error
 func (m *MockServer) MakePayment(ctx context.Context, req *PaymentRequest) (*PaymentResponse, error) {
+	m.messageChan <- req
+
 	response := mock.GetInterface(m.messageChan)
 	if response == nil {
 		log.Fatal("Test case did not program a mock response")
 	}
+
 	v, ok := response.(*PaymentResponse)
 	if !ok {
-		return nil, fmt.Errorf("Mock response is the wrong type: %+v", response)
+		return nil, fmt.Errorf("mock response is the wrong type: %+v", response)
 	}
-	m.messageChan <- req
+
 	return v, nil
 }
