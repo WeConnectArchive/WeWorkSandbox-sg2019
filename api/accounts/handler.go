@@ -1,7 +1,9 @@
 package accounts
 
 import (
-	context "context"
+	"context"
+	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -20,26 +22,26 @@ func (s *Server) PayInvoice(ctx context.Context, req *Invoice) (*Invoice, error)
 	invoiceID := req.Id
 
 	// process payment for invoice
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	timeoutCtx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
-	r1, err := s.PaymentsClient.MakePayment(ctx, &payments.PaymentRequest{})
+	r1, err := s.PaymentsClient.MakePayment(timeoutCtx, &payments.PaymentRequest{})
 	if err != nil {
-		log.Fatalf("Payment error: %v", err)
+		return nil, fmt.Errorf("payment error: %v", err)
 	}
 	if !r1.Paid {
-		log.Fatal("Failed to pay")
+		return nil, errors.New("failed to pay")
 	}
 	log.Printf("Paid: %t", r1.Paid)
 
 	// mark invoice as paid
-	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
+	timeoutCtx, cancel = context.WithTimeout(ctx, time.Second)
 	defer cancel()
-	r2, err := s.BillingClient.MarkInvoicePaid(ctx, &billing.Invoice{Id: invoiceID})
+	r2, err := s.BillingClient.MarkInvoicePaid(timeoutCtx, &billing.Invoice{Id: invoiceID})
 	if err != nil {
-		log.Fatalf("Mark invoice paid error: %v", err)
+		return nil, fmt.Errorf("mark invoice paid error: %v", err)
 	}
 	if !r2.Paid {
-		log.Fatal("Failed to mark invoice as paid")
+		return nil, errors.New("failed to mark invoice as paid")
 	}
 	log.Printf("Paid: %t", r2.Paid)
 
